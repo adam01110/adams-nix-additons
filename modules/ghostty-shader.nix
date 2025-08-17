@@ -1,12 +1,14 @@
-{ self }:
 {
   lib,
   config,
   pkgs,
   ...
-}:
+}@args:
 
 let
+  # Get self from specialArgs passed by the importing flake
+  self = args.specialArgs.self or (throw "ghostty-shader module requires 'self' in specialArgs");
+
   inherit (lib) mkOption types mkIf;
   cfg = config.programs.ghostty.shader;
 

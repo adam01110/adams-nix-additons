@@ -31,7 +31,7 @@
     {
       # Export the Home Manager module under both names
       homeManagerModules = {
-        ghostty-shader = { ... }@args: (import ./modules/ghostty-shader.nix { inherit self; }) args;
+        ghostty-shader = import ./modules/ghostty-shader.nix;
         default = self.outputs.homeManagerModules.ghostty-shader;
       };
 
@@ -69,11 +69,12 @@
         let
           pkgs = import nixpkgs { inherit system; };
           hm = home-manager;
-          hmModule = import ./modules/ghostty-shader.nix { inherit self; };
+          hmModule = import ./modules/ghostty-shader.nix;
 
           # Valid evaluation (forces evaluation by referencing activationPackage)
           validCfg = hm.lib.homeManagerConfiguration {
             inherit pkgs;
+            extraSpecialArgs = { inherit self; };
             modules = [
               hmModule
               {
@@ -99,6 +100,7 @@
           invalidTry = builtins.tryEval (
             hm.lib.homeManagerConfiguration {
               inherit pkgs;
+              extraSpecialArgs = { inherit self; };
               modules = [
                 hmModule
                 {
