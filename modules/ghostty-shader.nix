@@ -6,8 +6,10 @@
 }@args:
 
 let
-  # Get self from specialArgs passed by the importing flake
-  self = args.specialArgs.self or (throw "ghostty-shader module requires 'self' in specialArgs");
+  # Get the ghostty-shader flake from inputs (more user-friendly)
+  inputs =
+    args.specialArgs.inputs or (throw "ghostty-shader module requires 'inputs' in extraSpecialArgs");
+  self = inputs.ghostty-shader or (throw "ghostty-shader module requires inputs.ghostty-shader");
 
   inherit (lib) mkOption types mkIf;
   cfg = config.programs.ghostty.shader;

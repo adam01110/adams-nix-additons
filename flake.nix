@@ -74,7 +74,11 @@
           # Valid evaluation (forces evaluation by referencing activationPackage)
           validCfg = hm.lib.homeManagerConfiguration {
             inherit pkgs;
-            extraSpecialArgs = { inherit self; };
+            extraSpecialArgs = {
+              inputs = {
+                ghostty-shader = self;
+              };
+            };
             modules = [
               hmModule
               {
@@ -100,7 +104,11 @@
           invalidTry = builtins.tryEval (
             hm.lib.homeManagerConfiguration {
               inherit pkgs;
-              extraSpecialArgs = { inherit self; };
+              extraSpecialArgs = {
+                inputs = {
+                  ghostty-shader = self;
+                };
+              };
               modules = [
                 hmModule
                 {
