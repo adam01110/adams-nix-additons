@@ -67,10 +67,6 @@ in
     # Only add the shader field; do not override user-defined settings.
     programs.ghostty = {
       settings.shader = shaderPath;
-
-      # For older Ghostty versions that rely on extraConfig
-      # Use mkAfter so we do not overwrite user-provided extraConfig.
-      extraConfig = lib.mkAfter "shader ${shaderPath}\n";
     };
   };
 }
