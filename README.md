@@ -33,7 +33,7 @@ Below are minimal examples showing how to consume this module with both standalo
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ghostty-shader.url = "github:example/ghostty-shader-flake";
+    ghostty-shader.url = "github:adam01110/ghostty-shaders";
     ghostty-shader.inputs.nixpkgs.follows = "nixpkgs";
     ghostty-shader.inputs.home-manager.follows = "home-manager";
   };
