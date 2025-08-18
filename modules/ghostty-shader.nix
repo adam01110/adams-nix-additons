@@ -20,19 +20,8 @@ let
   # List shader filenames in the flake's shaders directory
   shaderNames = builtins.attrNames (builtins.readDir shaderDir);
 
-  # Package shaders into $out/share/ghostty/shaders
-  shadersPkg = pkgs.stdenvNoCC.mkDerivation {
-    pname = "ghostty-shaders";
-    version = "1.0.0";
-    src = shaderDir;
-    dontUnpack = true;
-    installPhase = ''
-      mkdir -p "$out/share/ghostty/shaders"
-      cp -v ${
-        lib.concatStringsSep " " (map (n: "${shaderDir}/${n}") shaderNames)
-      } "$out/share/ghostty/shaders/"
-    '';
-  };
+  # Reuse the flake's packaged shaders for the current system
+  shadersPkg = self.packages.${pkgs.system}.ghostty-shaders;
 
   shaderPath = "${shadersPkg}/share/ghostty/shaders/${cfg.name}";
 in
@@ -46,26 +35,17 @@ in
     };
 
     name = mkOption {
-      type = types.str;
+      type = types.enum shaderNames;
       default = "cursor_blaze.glsl";
       example = "manga_slash.glsl";
       description = ''
         Filename of the shader from this flake's shaders directory.
-        Must be one of: ${lib.concatStringsSep ", " shaderNames}
+        One of: ${lib.concatStringsSep ", " shaderNames}
       '';
     };
   };
 
   config = mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = lib.elem cfg.name shaderNames;
-        message =
-          "ghostty-shader: name '${cfg.name}' not found. Available shaders: "
-          + (lib.concatStringsSep ", " shaderNames);
-      }
-    ];
-
     # Only add the shader field; do not override user-defined settings.
     programs.ghostty = {
       settings.shader = shaderPath;

@@ -40,7 +40,6 @@
         system:
         let
           pkgs = import nixpkgs { inherit system; };
-          shaderNames = builtins.attrNames (builtins.readDir shadersDir);
         in
         {
           ghostty-shaders = pkgs.stdenvNoCC.mkDerivation {
@@ -50,17 +49,22 @@
             dontUnpack = true;
             installPhase = ''
               mkdir -p "$out/share/ghostty/shaders"
-              cp -v ${
-                lib.concatStringsSep " " (map (n: "${shadersDir}/${n}") shaderNames)
-              } "$out/share/ghostty/shaders/"
+              cp -v "$src"/*.glsl "$out/share/ghostty/shaders/"
             '';
             meta = with pkgs.lib; {
-              description = "Example Ghostty shaders (CRT and scanlines)";
-              platforms = systems;
+              description = "Ghostty cursor and visual effect shaders";
+              platforms = platforms.all;
               license = licenses.mit;
             };
           };
         }
+      );
+
+      # Provide a per-system formatter for convenience
+      formatter = lib.genAttrs systems (
+        system:
+        let pkgs = import nixpkgs { inherit system; };
+        in pkgs.nixpkgs-fmt
       );
 
       # Flake checks: evaluate module successfully; assert invalid name fails at evaluation
