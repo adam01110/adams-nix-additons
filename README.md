@@ -1,184 +1,157 @@
-# Ghostty Shader Flake
+# Ghostty Shaders and Custom Bibata Cursors Flake
 
-This flake ships a collection of Ghostty post-processing shaders and a Home Manager module that exposes two options:
+A Nix flake that provides both Ghostty shaders and customizable Bibata cursor themes, with Home Manager integration.
 
-- `programs.ghostty.shader.enable` (boolean; default `false`)
-- `programs.ghostty.shader.name` (string; must be the filename of a shader in this flake's `shaders/` directory)
+## Features
 
-When enabled, the module sets `programs.ghostty.settings.shader` to the derivation path of the selected shader packaged by this flake, and also appends a compatible line to `programs.ghostty.extraConfig`. When disabled, it does not alter Ghostty settings.
+### 🎨 Ghostty Shaders
 
-The shader files are shipped inside the flake and referenced via `self + "/shaders"` for purity and reproducibility.
+- Collection of visual effect shaders for the [Ghostty terminal emulator](https://github.com/ghostty-org/ghostty)
+- Fetched directly from the [KroneCorylus/ghostty-shader-playground](https://github.com/KroneCorylus/ghostty-shader-playground) repository
+- Home Manager module for easy configuration
+- Available shaders:
+  - `cursor_blaze.glsl` (default)
+  - `cursor_blaze_no_trail.glsl`
+  - `cursor_blaze_tapered.glsl`
+  - `cursor_frozen.glsl`
+  - `cursor_smear_fade.glsl`
+  - `cursor_smear.glsl`
+  - `debug_cursor_animated.glsl`
+  - `debug_cursor_static.glsl`
+  - `manga_slash.glsl`
+  - `WIP.glsl`
 
-Available shaders include cursor effects (blaze, smear, frozen), animated effects (manga slash), and debug utilities.
+### 🖱️ Custom Bibata Cursors
 
-## Outputs
+- Material design cursor theme based on [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor)
+- Support for custom colors (primary, secondary, tertiary)
+- Both modern and original styles
+- Support for left and right-handed variants
 
-- `homeManagerModules.default` and `homeManagerModules.ghostty-shader` — the Home Manager module.
-- `packages.<system>.ghostty-shaders` — installs the shaders to `$out/share/ghostty/shaders` for consumption outside Home Manager.
+## Installation & Usage
 
-## Example usage from another flake
+### Adding to Your Flake
 
-Below are minimal examples showing how to consume this module with both standalone Home Manager style and NixOS + Home Manager style. Replace the GitHub URL with the repository of this flake.
-
-### Flake inputs and outputs
+Add this flake as an input to your system flake:
 
 ```nix
 {
-  description = "My desktop";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager";
+
+    # Add this flake
+    adams-nix-additons.url = "github:yourusername/adams-nix-additons";
+    adams-nix-additons.inputs.nixpkgs.follows = "nixpkgs";
+  };
+}
+```
+
+### Using Ghostty Shaders with Home Manager
+
+```nix
+{
+  home-manager.users.yourusername = { inputs, ... }: {
+    imports = [
+      inputs.adams-nix-additons.homeManagerModules.ghostty-shader
+    ];
+
+    programs.ghostty = {
+      enable = true;
+
+      # Enable shader support
+      shader = {
+        enable = true;
+        name = "cursor_blaze.glsl";  # Choose any available shader
+      };
+
+      # Your other ghostty settings
+      settings = {
+        theme = "Dracula";
+        font-size = 14;
+      };
     };
-
-    ghostty-shader.url = "github:adam01110/ghostty-shaders";
-    ghostty-shader.inputs.nixpkgs.follows = "nixpkgs";
-    ghostty-shader.inputs.home-manager.follows = "home-manager";
-  };
-
-  outputs = { self, nixpkgs, home-manager, ghostty-shader, ... }:
-  let
-    lib = nixpkgs.lib;
-    systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-  in {
-    # Your outputs go here...
-## Validation and checks
-
-- The module asserts that when `programs.ghostty.shader.enable = true;`, the `name` exists in this flake's `shaders/` directory and fails evaluation otherwise with a clear message.
-- `nix flake check` includes:
-  - A valid evaluation that forces the module to evaluate successfully.
-  - A negative test that asserts enabling with an invalid name fails at evaluation.
-
   };
 }
 ```
 
-### Standalone Home Manager configuration
+### Installing Packages Directly
 
-- Case A: disabled (no Ghostty settings altered by this module)
+You can install the packages directly without Home Manager:
+
+```bash
+# Install ghostty shaders
+nix profile install github:yourusername/adams-nix-additons#ghostty-shaders
+
+# Install default bibata cursors
+nix profile install github:yourusername/adams-nix-additons#bibata-cursors-custom
+```
+
+### Creating Custom Colored Bibata Cursors
+
+Use the library function to create cursors with custom colors:
 
 ```nix
-{
-  homeConfigurations.me = home-manager.lib.homeManagerConfiguration {
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
-
-    modules = [
-      ghostty-shader.homeManagerModules.default
-
-      {
-        home.username = "me";
-        home.homeDirectory = "/home/me";
-
-        programs.ghostty.enable = true;
-
-        # Existing user settings are preserved; the module will not modify them when disabled.
-        programs.ghostty.settings = {
-          theme = "Dracula";
-          font-size = 12;
-        };
-
-        programs.ghostty.shader = {
-          enable = false;
-          # name is ignored while disabled
-          name = "cursor_blaze.glsl";
-        };
-      }
-    ];
+let
+  myCustomCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursors {
+    primaryColor = "#FF6B6B";    # Custom red
+    secondaryColor = "#4ECDC4";  # Custom teal
+    tertiaryColor = "#45B7D1";   # Custom blue
   };
-}
-```
-
-- Case B: enabled with the built-in "cursor_blaze.glsl"
-
-```nix
+in
 {
-  homeConfigurations.me = home-manager.lib.homeManagerConfiguration {
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
-
-    modules = [
-      ghostty-shader.homeManagerModules.default
-
-      {
-        home.username = "me";
-        home.homeDirectory = "/home/me";
-
-        programs.ghostty.enable = true;
-
-        # Your existing settings remain; the module only adds the 'shader' key.
-        programs.ghostty.settings = {
-          theme = "Catppuccin Mocha";
-          font-size = 12;
-        };
-
-        programs.ghostty.shader = {
-          enable = true;
-          name = "cursor_blaze.glsl"; # or "manga_slash.glsl", "cursor_smear.glsl", etc.
-        };
-      }
-    ];
-  };
+  # Use myCustomCursors in your configuration
+  home.packages = [ myCustomCursors ];
 }
 ```
 
-### NixOS + Home Manager module style
+## Available Outputs
 
-```nix
-{
-  nixosConfigurations.mach = nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
-    modules = [
-      home-manager.nixosModules.home-manager
+- **packages**: Pre-built packages for multiple systems
 
-      {
-        users.users.me = {
-          isNormalUser = true;
-          home = "/home/me";
-          extraGroups = [ "wheel" ];
-        };
+  - `ghostty-shaders`: Collection of Ghostty shader files
+  - `bibata-cursors-custom`: Default Bibata cursors with original colors
 
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
+- **lib**: Library functions for customization
 
-        home-manager.users.me = {
-          imports = [ ghostty-shader.homeManagerModules.default ];
+  - `makeBibataCursors`: Function to create custom colored Bibata cursors
 
-          programs.ghostty.enable = true;
+- **homeManagerModules**: Home Manager integration
+  - `ghostty-shader`: Module for easy Ghostty shader configuration
+  - `default`: Alias for the ghostty-shader module
 
-          # Example: disabled (does not change settings)
-          # programs.ghostty.shader.enable = false;
+## Development
 
-          # Example: enabled with "cursor_blaze.glsl"
-          programs.ghostty.shader.enable = true;
-          programs.ghostty.shader.name = "cursor_blaze.glsl";
+### Testing the Flake
 
-          # Existing settings are merged, not overwritten
-          programs.ghostty.settings = {
-            font-size = 13;
-            theme = "Dracula";
-          };
-        };
-      }
-    ];
-  };
-}
+```bash
+# Check flake validity
+nix flake check
+
+# Show available outputs
+nix flake show
+
+# Build packages locally
+nix build .#ghostty-shaders
+nix build .#bibata-cursors-custom
 ```
 
-### Consuming shaders without Home Manager
+### Color Customization
 
-To install the shaders derivation directly:
+The `makeBibataCursors` function accepts the following color parameters:
 
-- NixOS: add to `environment.systemPackages`
-- Home Manager: add to `home.packages`
+- `primaryColor` (default: `"#FF8C00"`): Amber color for primary variants
+- `secondaryColor` (default: `"#000000"`): Black color for classic variants
+- `tertiaryColor` (default: `"#FFFFFF"`): White color for ice variants
 
-```nix
-# Example inside a per-system output or module
-{
-  home.packages = [
-    ghostty-shader.packages.${pkgs.system}.ghostty-shaders
-  ];
-}
-```
+Colors should be provided as hex color codes (e.g., `"#FF6B6B"`).
 
-The shaders will be available under `$out/share/ghostty/shaders`.
+## License
+
+- Ghostty shaders: MIT License (from original repository)
+- Bibata cursors: GPL-3.0 License (from original repository)
+- This flake: MIT License
+
+## Contributing
+
+Feel free to submit issues and pull requests for improvements to the flake configuration or additional shader/cursor variants.

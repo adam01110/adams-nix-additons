@@ -1,5 +1,5 @@
 {
-  description = "Ghostty shader flake with a Home Manager module and packaged shaders";
+  description = "Ghostty shaders and custom Bibata cursors flake with Home Manager modules";
 
   inputs = {
     # Pinned by flake.lock when users run `nix flake update`.
@@ -8,6 +8,18 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Ghostty shader playground repository
+    ghostty-shader-playground = {
+      url = "github:KroneCorylus/ghostty-shader-playground";
+      flake = false;
+    };
+
+    # Bibata cursor repository
+    bibata-cursor-src = {
+      url = "github:ful1e5/Bibata_Cursor";
+      flake = false;
+    };
   };
 
   outputs =
@@ -15,6 +27,8 @@
       self,
       nixpkgs,
       home-manager,
+      ghostty-shader-playground,
+      bibata-cursor-src,
       ...
     }:
     let
@@ -26,7 +40,8 @@
         "aarch64-darwin"
       ];
 
-      shadersDir = ./shaders;
+      # Use the git repository for shaders instead of local directory
+      shadersDir = "${ghostty-shader-playground}/shaders";
     in
     {
       # Export the Home Manager module under both names
@@ -35,36 +50,27 @@
         default = self.outputs.homeManagerModules.ghostty-shader;
       };
 
-      # Expose packages.<system>.ghostty-shaders that installs shaders to $out/share/ghostty/shaders
-      packages = lib.genAttrs systems (
+      # Expose library functions for creating custom packages
+      lib = lib.genAttrs systems (
         system:
         let
           pkgs = import nixpkgs { inherit system; };
+          bibataCursorsLib = import ./modules/bibata-cursors.nix {
+            inherit lib pkgs bibata-cursor-src;
+          };
         in
         {
-          ghostty-shaders = pkgs.stdenvNoCC.mkDerivation {
-            pname = "ghostty-shaders";
-            version = "1.0.0";
-            src = shadersDir;
-            dontUnpack = true;
-            installPhase = ''
-              mkdir -p "$out/share/ghostty/shaders"
-              cp -v "$src"/*.glsl "$out/share/ghostty/shaders/"
-            '';
-            meta = with pkgs.lib; {
-              description = "Ghostty cursor and visual effect shaders";
-              platforms = platforms.all;
-              license = licenses.mit;
-            };
-          };
+          inherit (bibataCursorsLib) makeBibataCursorsClassic;
         }
       );
 
       # Provide a per-system formatter for convenience
       formatter = lib.genAttrs systems (
         system:
-        let pkgs = import nixpkgs { inherit system; };
-        in pkgs.nixpkgs-fmt
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        pkgs.nixpkgs-fmt
       );
 
       # Flake checks: evaluate module successfully; assert invalid name fails at evaluation
@@ -146,6 +152,35 @@
           hm-eval-invalid = pkgs.runCommand "ghostty-shader-hm-eval-invalid" { } ''
             mkdir -p "$out"
           '';
+        }
+      );
+
+      # Expose packages for both ghostty shaders and bibata cursors
+      packages = lib.genAttrs systems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          ghostty-shaders = pkgs.stdenvNoCC.mkDerivation {
+            pname = "ghostty-shaders";
+            version = "1.0.0";
+            src = shadersDir;
+            dontUnpack = true;
+            installPhase = ''
+              mkdir -p "$out/share/ghostty/shaders"
+              cp -v "$src"/*.glsl "$out/share/ghostty/shaders/"
+            '';
+            meta = with pkgs.lib; {
+              description = "Ghostty cursor and visual effect shaders";
+              homepage = "https://github.com/KroneCorylus/ghostty-shader-playground";
+              platforms = platforms.all;
+              license = licenses.mit;
+            };
+          };
+
+          # Default bibata classic cursors
+          bibata-cursors-classic = self.lib.${system}.makeBibataCursorsClassic { };
         }
       );
     };

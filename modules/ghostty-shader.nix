@@ -14,10 +14,10 @@ let
   inherit (lib) mkOption types mkIf;
   cfg = config.programs.ghostty.shader;
 
-  # Directory of shaders shipped by this flake
-  shaderDir = self + "/shaders";
+  # Directory of shaders from the git repository
+  shaderDir = "${inputs.ghostty-shader.inputs.ghostty-shader-playground}/shaders";
 
-  # List shader filenames in the flake's shaders directory
+  # List shader filenames in the git repository's shaders directory
   shaderNames = builtins.attrNames (builtins.readDir shaderDir);
 
   # Reuse the flake's packaged shaders for the current system

@@ -1,1 +1,5 @@
 flake.lock
+
+# Temporary git repositories (now used as flake inputs)
+Bibata_Cursor/
+ghostty-shader-playground/
