@@ -103,6 +103,7 @@ Enable in your Home Manager configuration:
 
 ### Packages
 
+- **`ghostty-shaders`** - Ghostty terminal shader effects package
 - **`bibata-cursors-classic`** - Material based classic cursor theme
 - **`bibata-cursors-rose-pine`** - Rose pine themed cursor set
 

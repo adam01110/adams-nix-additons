@@ -9,6 +9,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ghostty shader playground repository
+    ghostty-shader-playground = {
+      url = "github:KroneCorylus/ghostty-shader-playground";
+      flake = false;
+    };
+
     # Bibata cursor repository
     bibata-cursor-src = {
       url = "github:ful1e5/Bibata_Cursor";
@@ -21,6 +27,7 @@
       self,
       nixpkgs,
       home-manager,
+      ghostty-shader-playground,
       bibata-cursor-src,
       ...
     }:
@@ -156,6 +163,22 @@
           };
         in
         {
+          ghostty-shaders = pkgs.stdenvNoCC.mkDerivation {
+            pname = "ghostty-shaders";
+            version = "0.1.0";
+            src = ghostty-shader-playground;
+
+            installPhase = ''
+              mkdir -p $out/share/ghostty
+              cp -r shaders $out/share/ghostty/
+            '';
+
+            meta = {
+              description = "Ghostty terminal shader effects";
+              homepage = "https://github.com/KroneCorylus/ghostty-shader-playground";
+              license = lib.licenses.mit;
+            };
+          };
           bibata-cursors-classic = (pkgs.callPackage ./modules/bibata-cursors-classic.nix { }) { };
           bibata-cursors-rose-pine = rosePineLib.makeBibataCursorsRosePine { };
         }
