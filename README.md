@@ -1,6 +1,6 @@
-# Ghostty Shaders and Custom Bibata Cursors Flake
+# Ghostty Shaders and Classic Bibata Cursors Flake
 
-A Nix flake that provides both Ghostty shaders and customizable Bibata cursor themes, with Home Manager integration.
+A Nix flake that provides both Ghostty shaders and classic Bibata cursor themes, with Home Manager integration.
 
 ## Features
 
@@ -21,12 +21,13 @@ A Nix flake that provides both Ghostty shaders and customizable Bibata cursor th
   - `manga_slash.glsl`
   - `WIP.glsl`
 
-### 🖱️ Custom Bibata Cursors
+### 🖱️ Classic Bibata Cursors
 
 - Material design cursor theme based on [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor)
-- Support for custom colors (primary, secondary, tertiary)
-- Both modern and original styles
+- **Classic variants only** - packages only the black/dark cursor variants
+- Both modern and original (sharp edge) styles
 - Support for left and right-handed variants
+- Modular architecture for easy customization
 
 ## Installation & Usage
 
@@ -83,20 +84,19 @@ You can install the packages directly without Home Manager:
 # Install ghostty shaders
 nix profile install github:yourusername/adams-nix-additons#ghostty-shaders
 
-# Install default bibata cursors
-nix profile install github:yourusername/adams-nix-additons#bibata-cursors-custom
+# Install classic bibata cursors
+nix profile install github:yourusername/adams-nix-additons#bibata-cursors-classic
 ```
 
-### Creating Custom Colored Bibata Cursors
+### Creating Custom Bibata Classic Cursors
 
-Use the library function to create cursors with custom colors:
+Use the library function to create classic cursors with custom options:
 
 ```nix
 let
-  myCustomCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursors {
-    primaryColor = "#FF6B6B";    # Custom red
-    secondaryColor = "#4ECDC4";  # Custom teal
-    tertiaryColor = "#45B7D1";   # Custom blue
+  myCustomCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsClassic {
+    primaryColor = "#000000";      # Black (classic color)
+    enableRightHanded = true;      # Include right-handed variants
   };
 in
 {
@@ -110,11 +110,11 @@ in
 - **packages**: Pre-built packages for multiple systems
 
   - `ghostty-shaders`: Collection of Ghostty shader files
-  - `bibata-cursors-custom`: Default Bibata cursors with original colors
+  - `bibata-cursors-classic`: Classic Bibata cursors (black variants only)
 
 - **lib**: Library functions for customization
 
-  - `makeBibataCursors`: Function to create custom colored Bibata cursors
+  - `makeBibataCursorsClassic`: Function to create classic Bibata cursors
 
 - **homeManagerModules**: Home Manager integration
   - `ghostty-shader`: Module for easy Ghostty shader configuration
@@ -133,18 +133,17 @@ nix flake show
 
 # Build packages locally
 nix build .#ghostty-shaders
-nix build .#bibata-cursors-custom
+nix build .#bibata-cursors-classic
 ```
 
-### Color Customization
+### Customization Options
 
-The `makeBibataCursors` function accepts the following color parameters:
+The `makeBibataCursorsClassic` function accepts the following parameters:
 
-- `primaryColor` (default: `"#FF8C00"`): Amber color for primary variants
-- `secondaryColor` (default: `"#000000"`): Black color for classic variants
-- `tertiaryColor` (default: `"#FFFFFF"`): White color for ice variants
+- `primaryColor` (default: `"#000000"`): Color for the classic cursor variants
+- `enableRightHanded` (default: `true`): Whether to include right-handed cursor variants
 
-Colors should be provided as hex color codes (e.g., `"#FF6B6B"`).
+Colors should be provided as hex color codes (e.g., `"#000000"`).
 
 ## License
 

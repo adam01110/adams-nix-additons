@@ -6,16 +6,17 @@
 }@args:
 
 let
-  # Get the ghostty-shader flake from inputs (more user-friendly)
+  # Get the adams-nix-additons flake from inputs (updated from ghostty-shader)
   inputs =
     args.specialArgs.inputs or (throw "ghostty-shader module requires 'inputs' in extraSpecialArgs");
-  self = inputs.ghostty-shader or (throw "ghostty-shader module requires inputs.ghostty-shader");
+  self =
+    inputs.adams-nix-additons or (throw "ghostty-shader module requires inputs.adams-nix-additons");
 
   inherit (lib) mkOption types mkIf;
   cfg = config.programs.ghostty.shader;
 
   # Directory of shaders from the git repository
-  shaderDir = "${inputs.ghostty-shader.inputs.ghostty-shader-playground}/shaders";
+  shaderDir = "${inputs.adams-nix-additons.inputs.ghostty-shader-playground}/shaders";
 
   # List shader filenames in the git repository's shaders directory
   shaderNames = builtins.attrNames (builtins.readDir shaderDir);
