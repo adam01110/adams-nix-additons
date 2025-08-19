@@ -1,202 +1,131 @@
 # adams-nix-additons
 
-A Nix flake that provides both Ghostty shaders and Bibata cursor themes, with Home Manager integration.
+A Nix flake providing **Ghostty terminal shader effects** and **Bibata cursor themes** for NixOS and Home Manager.
 
 ## Features
 
 ### 🎨 Ghostty Shaders
 
-- Collection of visual effect shaders for the [Ghostty terminal emulator](https://github.com/ghostty-org/ghostty)
-- Fetched directly from the [KroneCorylus/ghostty-shader-playground](https://github.com/KroneCorylus/ghostty-shader-playground) repository
-- Home Manager module for easy configuration
-- Available shaders:
-  - `cursor_blaze.glsl` (default)
-  - `cursor_blaze_no_trail.glsl`
-  - `cursor_blaze_tapered.glsl`
-  - `cursor_frozen.glsl`
-  - `cursor_smear_fade.glsl`
-  - `cursor_smear.glsl`
-  - `debug_cursor_animated.glsl`
-  - `debug_cursor_static.glsl`
-  - `manga_slash.glsl`
-  - `WIP.glsl`
+High-quality visual effects and themes for the [Ghostty terminal emulator](https://github.com/ghostty-org/ghostty).
 
 ### 🖱️ Bibata Cursors
 
-Material design cursor themes based on [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor) with two variants:
+Material-based cursor themes with two variants:
 
-#### Black Cursors
+#### Classic Cursors
 
-- Classic black/dark cursor variants
-- Both modern and original (sharp edge) styles
-- Support for left and right-handed variants
-- Modular architecture for easy customization
+- **Description**: Traditional black cursors with white outlines
+- **Package**: `bibata-cursors-classic`
+- **Style**: Material design aesthetic with classic black theme
 
 #### Rose Pine Cursors
 
-- Rose Pine themed cursor variants with custom colors
-- Both modern and original (sharp edge) styles
-- Support for left and right-handed variants
-- Uses the following Rose Pine color palette:
+- **Description**: Rose Pine themed cursors with a carefully crafted color palette
+- **Package**: `bibata-cursors-rose-pine`
+- **Colors**:
   - **base**: `#191724` (primary background)
   - **outline**: `#21202e` (cursor outline)
   - **watch background**: `#26233a` (loading/wait states)
   - **watch colors**: `#32a0da`, `#7eba41`, `#f05024`, `#fcb813` (animated elements)
 
-## Installation & Usage
+## Installation
 
-### Adding to Your Flake
+### Flake Inputs
 
-Add this flake as an input to your system flake:
+Add this flake to your `flake.nix` inputs:
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
-
-    # Add this flake
-    adams-nix-additons.url = "github:yourusername/adams-nix-additons";
-    adams-nix-additons.inputs.nixpkgs.follows = "nixpkgs";
-  };
-}
-```
-
-### Using Ghostty Shaders with Home Manager
-
-```nix
-{
-  home-manager.users.yourusername = { inputs, ... }: {
-    imports = [
-      inputs.adams-nix-additons.homeManagerModules.ghostty-shader
-    ];
-
-    programs.ghostty = {
-      enable = true;
-
-      # Enable shader support
-      shader = {
-        enable = true;
-        name = "cursor_blaze.glsl";  # Choose any available shader
-      };
-
-      # Your other ghostty settings
-      settings = {
-        theme = "Dracula";
-        font-size = 14;
-      };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    adams-nix-additons = {
+      url = "github:yourusername/adams-nix-additons";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
   };
 }
 ```
 
-### Installing Packages Directly
+### Package Installation
 
-You can install the packages directly without Home Manager:
-
-```bash
-# Install ghostty shaders
-nix profile install github:yourusername/adams-nix-additons#ghostty-shaders
-
-# Install black bibata cursors
-nix profile install github:yourusername/adams-nix-additons#bibata-cursors-black
-
-# Install rose pine bibata cursors
-nix profile install github:yourusername/adams-nix-additons#bibata-cursors-rose-pine
-```
-
-### Creating Custom Bibata Cursors
-
-#### Black Cursors
-
-Use the library function to create black cursors with custom options:
+#### Classic Cursors
 
 ```nix
-let
-  myCustomBlackCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsBlack {
-    primaryColor = "#000000";      # Black (default color)
-    enableRightHanded = true;      # Include right-handed variants
-  };
-in
-{
-  # Use myCustomBlackCursors in your configuration
-  home.packages = [ myCustomBlackCursors ];
-}
+# In your system configuration or home-manager
+environment.systemPackages = [
+  inputs.adams-nix-additons.packages.${system}.bibata-cursors-classic
+];
+
+# Or in home-manager
+home.packages = [
+  inputs.adams-nix-additons.packages.${system}.bibata-cursors-classic
+];
 ```
 
 #### Rose Pine Cursors
 
-Use the library function to create rose pine cursors:
+```nix
+# In your system configuration or home-manager
+environment.systemPackages = [
+  inputs.adams-nix-additons.packages.${system}.bibata-cursors-rose-pine
+];
+
+# Or in home-manager
+home.packages = [
+  inputs.adams-nix-additons.packages.${system}.bibata-cursors-rose-pine
+];
+```
+
+### Ghostty Shader Module
+
+Enable in your Home Manager configuration:
 
 ```nix
-let
-  myRosePineCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsRosePine {
-    enableRightHanded = true;      # Include right-handed variants
-  };
-in
 {
-  # Use myRosePineCursors in your configuration
-  home.packages = [ myRosePineCursors ];
+  imports = [
+    inputs.adams-nix-additons.homeManagerModules.ghostty-shader
+  ];
+
+  programs.ghostty-shader = {
+    enable = true;
+    # Optional: specify shader files
+    shaderFiles = ["blur.frag" "glow.frag"];
+  };
 }
 ```
 
 ## Available Outputs
 
-- **packages**: Pre-built packages for multiple systems
+### Packages
 
-  - `ghostty-shaders`: Collection of Ghostty shader files
-  - `bibata-cursors-black`: Black Bibata cursors
-  - `bibata-cursors-rose-pine`: Rose Pine themed Bibata cursors
+- **`bibata-cursors-classic`** - Material based classic cursor theme
+- **`bibata-cursors-rose-pine`** - Rose pine themed cursor set
 
-- **lib**: Library functions for customization
+### Home Manager Modules
 
-  - `makeBibataCursorsBlack`: Function to create black Bibata cursors
-  - `makeBibataCursorsRosePine`: Function to create rose pine Bibata cursors
-
-- **homeManagerModules**: Home Manager integration
-  - `ghostty-shader`: Module for easy Ghostty shader configuration
-  - `default`: Alias for the ghostty-shader module
+- **`ghostty-shader`** - Module for managing Ghostty shader effects
 
 ## Development
 
-### Testing the Flake
+### Building Locally
 
 ```bash
-# Check flake validity
-nix flake check
-
-# Show available outputs
-nix flake show
-
-# Build packages locally
-nix build .#ghostty-shaders
-nix build .#bibata-cursors-black
+nix build .#bibata-cursors-classic
 nix build .#bibata-cursors-rose-pine
+nix build .#ghostty-shader
 ```
 
-### Customization Options
+### Testing
 
-#### Black Cursors
-
-The `makeBibataCursorsBlack` function accepts the following parameters:
-
-- `primaryColor` (default: `"#000000"`): Color for the black cursor variants
-- `enableRightHanded` (default: `true`): Whether to include right-handed cursor variants
-
-#### Rose Pine Cursors
-
-The `makeBibataCursorsRosePine` function accepts the following parameters:
-
-- `enableRightHanded` (default: `true`): Whether to include right-handed cursor variants
-
-Colors should be provided as hex color codes (e.g., `"#000000"`).
+```bash
+nix flake check
+```
 
 ## License
 
-- Ghostty shaders: MIT License (from original repository)
-- Bibata cursors: GPL-3.0 License (from original repository)
-- This flake: MIT License
-
-## Contributing
-
-Feel free to submit issues and pull requests for improvements to the flake configuration or additional shader/cursor variants.
+MIT License - see [LICENSE](LICENSE) file for details.
