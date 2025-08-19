@@ -21,10 +21,8 @@ let
   # List shader filenames in the git repository's shaders directory
   shaderNames = builtins.attrNames (builtins.readDir shaderDir);
 
-  # Reuse the flake's packaged shaders for the current system
-  shadersPkg = self.packages.${pkgs.system}.ghostty-shaders;
-
-  shaderPath = "${shadersPkg}/share/ghostty/shaders/${cfg.name}";
+  # Use direct path to shader instead of packaged approach
+  shaderPath = "${shaderDir}/${cfg.name}";
 in
 {
   options.programs.ghostty.shader = {
@@ -32,7 +30,7 @@ in
       type = types.bool;
       default = false;
       example = true;
-      description = "Enable setting a Ghostty shader packaged by this flake.";
+      description = "Enable setting a Ghostty shader from the shader playground.";
     };
 
     name = mkOption {
@@ -40,7 +38,7 @@ in
       default = "cursor_blaze.glsl";
       example = "manga_slash.glsl";
       description = ''
-        Filename of the shader from this flake's shaders directory.
+        Filename of the shader from the shader playground repository.
         One of: ${lib.concatStringsSep ", " shaderNames}
       '';
     };

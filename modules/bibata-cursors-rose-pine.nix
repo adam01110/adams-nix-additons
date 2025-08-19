@@ -18,6 +18,7 @@
 
       nativeBuildInputs = with pkgs; [
         clickgen
+        cbmp
         python3
         python3Packages.attrs
         python3Packages.pillow
@@ -61,7 +62,7 @@
         "
 
                 # Build bitmaps with rose pine colors
-                cbmp render.json
+                cbmp render.json > build.log 2>&1
 
                 # Build Modern style rose pine cursors
                 ctgen configs/normal/x.build.toml -p x11 -d bitmaps/Bibata-Modern-RosePine -n 'Bibata-Modern-RosePine' -c 'Rose Pine Bibata modern XCursors'

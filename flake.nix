@@ -39,6 +39,9 @@
         "x86_64-darwin"
         "aarch64-darwin"
       ];
+
+      # Use the git repository for shaders instead of local directory
+      shadersDir = "${ghostty-shader-playground}/shaders";
     in
     {
       # Export the Home Manager module under both names
@@ -52,13 +55,16 @@
         system:
         let
           pkgs = import nixpkgs { inherit system; };
-          rosePineLib = pkgs.callPackage ./modules/bibata-cursors-rose-pine.nix {
-            inherit bibata-cursor-src;
+          bibataCursorsLib = import ./modules/bibata-cursors-classic.nix {
+            inherit lib pkgs bibata-cursor-src;
+          };
+          bibataCursorsRosePineLib = import ./modules/bibata-cursors-rose-pine.nix {
+            inherit lib pkgs bibata-cursor-src;
           };
         in
         {
-          makeBibataCursorsClassic = pkgs.callPackage ./modules/bibata-cursors-classic.nix { };
-          inherit (rosePineLib) makeBibataCursorsRosePine;
+          inherit (bibataCursorsLib) makeBibataCursorsBlack;
+          inherit (bibataCursorsRosePineLib) makeBibataCursorsRosePine;
         }
       );
 
@@ -158,29 +164,30 @@
         system:
         let
           pkgs = import nixpkgs { inherit system; };
-          rosePineLib = pkgs.callPackage ./modules/bibata-cursors-rose-pine.nix {
-            inherit bibata-cursor-src;
-          };
         in
         {
           ghostty-shaders = pkgs.stdenvNoCC.mkDerivation {
             pname = "ghostty-shaders";
-            version = "0.1.0";
-            src = ghostty-shader-playground;
-
+            version = "1.0.0";
+            src = shadersDir;
+            dontUnpack = true;
             installPhase = ''
-              mkdir -p $out/share/ghostty
-              cp -r shaders $out/share/ghostty/
+              mkdir -p "$out/share/ghostty/shaders"
+              cp -v "$src"/*.glsl "$out/share/ghostty/shaders/"
             '';
-
-            meta = {
-              description = "Ghostty terminal shader effects";
+            meta = with pkgs.lib; {
+              description = "Ghostty cursor and visual effect shaders";
               homepage = "https://github.com/KroneCorylus/ghostty-shader-playground";
-              license = lib.licenses.mit;
+              platforms = platforms.all;
+              license = licenses.mit;
             };
           };
-          bibata-cursors-classic = (pkgs.callPackage ./modules/bibata-cursors-classic.nix { }) { };
-          bibata-cursors-rose-pine = rosePineLib.makeBibataCursorsRosePine { };
+
+          # Classic bibata cursors
+          bibata-cursors-classic = self.lib.${system}.makeBibataCursorsBlack { };
+
+          # Rose Pine bibata cursors
+          bibata-cursors-rose-pine = self.lib.${system}.makeBibataCursorsRosePine { };
         }
       );
     };
