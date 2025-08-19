@@ -5,14 +5,14 @@
 }:
 
 {
-  # Function to create bibata cursors with only classic variants
-  makeBibataCursorsClassic =
+  # Function to create bibata cursors with only black variants
+  makeBibataCursorsBlack =
     {
       primaryColor ? "#000000",
       enableRightHanded ? true,
     }:
     pkgs.stdenvNoCC.mkDerivation rec {
-      pname = "bibata-cursors-classic";
+      pname = "bibata-cursors-black";
       version = "2.0.7";
 
       src = bibata-cursor-src;
@@ -30,7 +30,7 @@
       buildPhase = ''
         runHook preBuild
 
-        # Build only classic cursors (black/dark variants)
+        # Build only black cursors (classic variants)
         # Modern style classic
         ctgen configs/normal/x.build.toml -p x11 -d $bitmaps/Bibata-Modern-Classic -n 'Bibata-Modern-Classic' -c 'Classic black Bibata modern XCursors'
 
@@ -56,7 +56,7 @@
       '';
 
       meta = with lib; {
-        description = "Material Based Classic Cursor Theme (Black variants only)";
+        description = "Material Based Black Cursor Theme (Classic variants)";
         homepage = "https://github.com/ful1e5/Bibata_Cursor";
         license = licenses.gpl3Only;
         platforms = platforms.linux;

@@ -58,9 +58,13 @@
           bibataCursorsLib = import ./modules/bibata-cursors.nix {
             inherit lib pkgs bibata-cursor-src;
           };
+          bibataCursorsRosePineLib = import ./modules/bibata-cursors-rose-pine.nix {
+            inherit lib pkgs bibata-cursor-src;
+          };
         in
         {
-          inherit (bibataCursorsLib) makeBibataCursorsClassic;
+          inherit (bibataCursorsLib) makeBibataCursorsBlack;
+          inherit (bibataCursorsRosePineLib) makeBibataCursorsRosePine;
         }
       );
 
@@ -179,8 +183,11 @@
             };
           };
 
-          # Default bibata classic cursors
-          bibata-cursors-classic = self.lib.${system}.makeBibataCursorsClassic { };
+          # Black bibata cursors (formerly classic)
+          bibata-cursors-black = self.lib.${system}.makeBibataCursorsBlack { };
+
+          # Rose Pine bibata cursors
+          bibata-cursors-rose-pine = self.lib.${system}.makeBibataCursorsRosePine { };
         }
       );
     };

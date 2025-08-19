@@ -1,6 +1,6 @@
-# Ghostty Shaders and Classic Bibata Cursors Flake
+# adams-nix-additons
 
-A Nix flake that provides both Ghostty shaders and classic Bibata cursor themes, with Home Manager integration.
+A Nix flake that provides both Ghostty shaders and Bibata cursor themes, with Home Manager integration.
 
 ## Features
 
@@ -21,13 +21,27 @@ A Nix flake that provides both Ghostty shaders and classic Bibata cursor themes,
   - `manga_slash.glsl`
   - `WIP.glsl`
 
-### 🖱️ Classic Bibata Cursors
+### 🖱️ Bibata Cursors
 
-- Material design cursor theme based on [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor)
-- **Classic variants only** - packages only the black/dark cursor variants
+Material design cursor themes based on [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor) with two variants:
+
+#### Black Cursors
+
+- Classic black/dark cursor variants
 - Both modern and original (sharp edge) styles
 - Support for left and right-handed variants
 - Modular architecture for easy customization
+
+#### Rose Pine Cursors
+
+- Rose Pine themed cursor variants with custom colors
+- Both modern and original (sharp edge) styles
+- Support for left and right-handed variants
+- Uses the following Rose Pine color palette:
+  - **base**: `#191724` (primary background)
+  - **outline**: `#21202e` (cursor outline)
+  - **watch background**: `#26233a` (loading/wait states)
+  - **watch colors**: `#32a0da`, `#7eba41`, `#f05024`, `#fcb813` (animated elements)
 
 ## Installation & Usage
 
@@ -84,24 +98,45 @@ You can install the packages directly without Home Manager:
 # Install ghostty shaders
 nix profile install github:yourusername/adams-nix-additons#ghostty-shaders
 
-# Install classic bibata cursors
-nix profile install github:yourusername/adams-nix-additons#bibata-cursors-classic
+# Install black bibata cursors
+nix profile install github:yourusername/adams-nix-additons#bibata-cursors-black
+
+# Install rose pine bibata cursors
+nix profile install github:yourusername/adams-nix-additons#bibata-cursors-rose-pine
 ```
 
-### Creating Custom Bibata Classic Cursors
+### Creating Custom Bibata Cursors
 
-Use the library function to create classic cursors with custom options:
+#### Black Cursors
+
+Use the library function to create black cursors with custom options:
 
 ```nix
 let
-  myCustomCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsClassic {
-    primaryColor = "#000000";      # Black (classic color)
+  myCustomBlackCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsBlack {
+    primaryColor = "#000000";      # Black (default color)
     enableRightHanded = true;      # Include right-handed variants
   };
 in
 {
-  # Use myCustomCursors in your configuration
-  home.packages = [ myCustomCursors ];
+  # Use myCustomBlackCursors in your configuration
+  home.packages = [ myCustomBlackCursors ];
+}
+```
+
+#### Rose Pine Cursors
+
+Use the library function to create rose pine cursors:
+
+```nix
+let
+  myRosePineCursors = inputs.adams-nix-additons.lib.${system}.makeBibataCursorsRosePine {
+    enableRightHanded = true;      # Include right-handed variants
+  };
+in
+{
+  # Use myRosePineCursors in your configuration
+  home.packages = [ myRosePineCursors ];
 }
 ```
 
@@ -110,11 +145,13 @@ in
 - **packages**: Pre-built packages for multiple systems
 
   - `ghostty-shaders`: Collection of Ghostty shader files
-  - `bibata-cursors-classic`: Classic Bibata cursors (black variants only)
+  - `bibata-cursors-black`: Black Bibata cursors
+  - `bibata-cursors-rose-pine`: Rose Pine themed Bibata cursors
 
 - **lib**: Library functions for customization
 
-  - `makeBibataCursorsClassic`: Function to create classic Bibata cursors
+  - `makeBibataCursorsBlack`: Function to create black Bibata cursors
+  - `makeBibataCursorsRosePine`: Function to create rose pine Bibata cursors
 
 - **homeManagerModules**: Home Manager integration
   - `ghostty-shader`: Module for easy Ghostty shader configuration
@@ -133,14 +170,23 @@ nix flake show
 
 # Build packages locally
 nix build .#ghostty-shaders
-nix build .#bibata-cursors-classic
+nix build .#bibata-cursors-black
+nix build .#bibata-cursors-rose-pine
 ```
 
 ### Customization Options
 
-The `makeBibataCursorsClassic` function accepts the following parameters:
+#### Black Cursors
 
-- `primaryColor` (default: `"#000000"`): Color for the classic cursor variants
+The `makeBibataCursorsBlack` function accepts the following parameters:
+
+- `primaryColor` (default: `"#000000"`): Color for the black cursor variants
+- `enableRightHanded` (default: `true`): Whether to include right-handed cursor variants
+
+#### Rose Pine Cursors
+
+The `makeBibataCursorsRosePine` function accepts the following parameters:
+
 - `enableRightHanded` (default: `true`): Whether to include right-handed cursor variants
 
 Colors should be provided as hex color codes (e.g., `"#000000"`).
