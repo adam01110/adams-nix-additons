@@ -48,7 +48,7 @@
           };
         in
         {
-          inherit (bibataCursorsLib) makeBibataCursorsBlack;
+          inherit (bibataCursorsLib) makeBibataCursorsClassic;
           inherit (bibataCursorsRosePineLib) makeBibataCursorsRosePine;
         }
       );
@@ -67,8 +67,8 @@
           pkgs = import nixpkgs { inherit system; };
         in
         {
-          bibata-cursors-classic = self.lib.${system}.makeBibataCursorsBlack { };
-          bibata-cursors-rose-pine = self.lib.${system}.makeBibataCursorsRosePine { };
+          bibata-cursors-classic = self.lib.${system}.makeBibataCursorsClassic;
+          bibata-cursors-rose-pine = self.lib.${system}.makeBibataCursorsRosePine;
         }
       );
     };
