@@ -5,7 +5,7 @@
 }:
 
 {
-  # Function to create bibata cursors with only black variants
+  # Function to create bibata cursors with only classic variants
   makeBibataCursorsBlack =
     {
       primaryColor ? "#000000",

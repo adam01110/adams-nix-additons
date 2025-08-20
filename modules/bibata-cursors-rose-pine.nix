@@ -5,7 +5,7 @@
 }:
 
 {
-  # Function to create bibata cursors with rose pine theme
+  # Function to create bibata cursors with rose pine variants
   makeBibataCursorsRosePine =
     {
       enableRightHanded ? true,
